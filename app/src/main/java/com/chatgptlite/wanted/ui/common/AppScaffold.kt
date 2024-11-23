@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.material3.DrawerValue.Closed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.chatgptlite.wanted.ui.conversations.ConversationViewModel
 import com.chatgptlite.wanted.ui.theme.BackGroundColor
@@ -24,9 +25,10 @@ fun AppScaffold(
     content: @Composable () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     scope.launch {
-        conversationViewModel.initialize()
+        conversationViewModel.initialize(context = context)
     }
 
     ModalNavigationDrawer(

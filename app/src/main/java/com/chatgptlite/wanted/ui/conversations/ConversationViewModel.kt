@@ -2,6 +2,9 @@
 
 package com.chatgptlite.wanted.ui.conversations
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.provider.Settings
 import androidx.lifecycle.ViewModel
 import com.chatgptlite.wanted.data.remote.ConversationRepository
 import com.chatgptlite.wanted.data.remote.MessageRepository
@@ -31,6 +34,7 @@ class ConversationViewModel @Inject constructor(
         MutableStateFlow(HashMap())
     private val _isFetching: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private val _isFabExpanded = MutableStateFlow(false)
+    private val _deviceId: MutableStateFlow<String> = MutableStateFlow("")
 
     val currentConversationState: StateFlow<String> = _currentConversation.asStateFlow()
     val conversationsState: StateFlow<MutableList<ConversationModel>> = _conversations.asStateFlow()
@@ -41,12 +45,12 @@ class ConversationViewModel @Inject constructor(
 
     private var stopReceivingResults = false
 
+    suspend fun initialize(context: Context) {
+        _deviceId.value = _getDeviceUniqueId(context)
 
-
-    suspend fun initialize() {
         _isFetching.value = true
 
-        _conversations.value = conversationRepo.fetchConversations()
+        _conversations.value = conversationRepo.fetchConversations(deviceId = _deviceId.value)
 
         if (_conversations.value.isNotEmpty()) {
             _currentConversation.value = _conversations.value.first().id
@@ -113,6 +117,7 @@ class ConversationViewModel @Inject constructor(
         val newConversation: ConversationModel = ConversationModel(
             id = _currentConversation.value,
             title = title,
+            deviceId = _deviceId.value,
             createdAt = Date(),
         )
 
@@ -223,10 +228,17 @@ class ConversationViewModel @Inject constructor(
 
         _messages.value = messagesMap
     }
+
     fun stopReceivingResults() {
         stopReceivingResults = true
     }
+
     private fun setFabExpanded(expanded: Boolean) {
         _isFabExpanded.value = expanded
+    }
+
+    @SuppressLint("HardwareIds")
+    private fun _getDeviceUniqueId(context: Context): String {
+        return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     }
 }

@@ -11,14 +11,16 @@ class ConversationRepositoryImpl @Inject constructor(
     private val fsInstance: FirebaseFirestore,
 ) : ConversationRepository {
 
-    override suspend fun fetchConversations(): MutableList<ConversationModel> {
+    override suspend fun fetchConversations(deviceId: String): MutableList<ConversationModel> {
+        val snapshot = fsInstance.collection(conversationCollection)
+            .whereEqualTo("deviceId", deviceId)
+            .get()
+            .await()
 
-        if (getFireBaseSnapShot().documents.isNotEmpty()) {
-            val documents = getFireBaseSnapShot().documents
-
-            return documents.map {
+        if (snapshot.documents.isNotEmpty()) {
+            return snapshot.documents.mapNotNull {
                 it.toObject(ConversationModel::class.java)
-            }.toList() as MutableList<ConversationModel>
+            }.toMutableList()
         }
 
         return mutableListOf()

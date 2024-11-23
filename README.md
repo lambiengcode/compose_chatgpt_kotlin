@@ -23,7 +23,7 @@ Overall, Compose ChatGPT Kotlin is a powerful and flexible chatbot solution that
 
 
 ## Requirements
-- Android Studio Arctic Fox or later
+- Android Studio Ladybug or later
 - OpenAI API Key
 - Firebase
 
